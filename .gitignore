@@ -1,0 +1,93 @@
+# ===================
+# Global ignores
+# ===================
+*.DS_Store
+*.log
+*.pyc
+*.pyo
+*.swp
+*.swo
+*.bak
+*.tmp
+__pycache__/
+.env
+.env.*
+
+# ===================
+# Python / AI section
+# ===================
+ai/__pycache__/
+ai/**/*.pyc
+ai/**/.ipynb_checkpoints/
+ai/data/**/*
+!ai/data/.gitkeep         # Keep structure
+ai/feedback/*.db
+ai/models/**/*
+!ai/models/.gitkeep       # Keep structure
+ai/scripts/__pycache__/
+ai/scripts/*.pyc
+
+# Jupyter / Colab
+*.ipynb_checkpoints
+.ipynb_checkpoints/
+*.ipynb_save
+
+# Virtualenv
+venv/
+.env/
+.venv/
+!.env.example
+
+# ===================
+# FastAPI backend
+# ===================
+app/server/__pycache__/
+app/server/**/*.pyc
+
+# ===================
+# React Native client
+# ===================
+# Android
+android/
+*.apk
+*.keystore
+
+# iOS
+ios/
+*.xcodeproj/
+*.xcworkspace/
+*.xcuserstate
+*.xcuserdata/
+
+# Metro + React Native
+node_modules/
+*.babelrc
+*.watchmanconfig
+.expo/
+.expo-shared/
+
+# Build files
+build/
+dist/
+*.bundle
+*.map
+
+# NPM logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# React Native fast refresh cache
+.expo/
+.expo-shared/
+
+# ===================
+# IDE / OS
+# ===================
+.vscode/
+.idea/
+*.iml
+*.sublime-workspace
+*.sublime-project
+Thumbs.db
+ehthumbs.db
