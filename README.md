@@ -30,7 +30,7 @@ app/ # React Native mobile app and FastAPI backend
 | Frontend  | React Native     |
 | Backend   | FastAPI          |
 | Text AI   | BERT, GoEmotions |
-| Voice AI  | SpeechBrain, IEMOCAP |
+| Voice AI  | SpeechBrain, RAVDESS |
 | Storage   | SQLite (local)   |
 
 ---
@@ -41,7 +41,7 @@ Clone this repository and follow setup instructions inside the `/ai` and `/app` 
 
 ---
 
-## 📚 Thesis Info
+## Thesis Info
 
 - Author: Daniil Shchennikov
 - Supervisor: Johan Dams
