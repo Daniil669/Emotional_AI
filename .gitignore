@@ -12,6 +12,7 @@
 __pycache__/
 .env
 .env.*
+!.env.example
 
 # ===================
 # Python / AI section
@@ -22,10 +23,15 @@ ai/**/.ipynb_checkpoints/
 ai/data/**/*
 !ai/data/.gitkeep         # Keep structure
 ai/feedback/*.db
-ai/models/**/*
+ai/models/**/* # change
 !ai/models/.gitkeep       # Keep structure
 ai/scripts/__pycache__/
 ai/scripts/*.pyc
+
+# Large AI artifacts — keep local
+ai/models/text/model/
+ai/models/audio/checkpoint/
+
 
 # Jupyter / Colab
 *.ipynb_checkpoints
@@ -91,3 +97,5 @@ yarn-error.log*
 *.sublime-project
 Thumbs.db
 ehthumbs.db
+.code-workspace
+wsl_windows_forwarding.txt
