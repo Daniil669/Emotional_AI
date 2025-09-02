@@ -122,10 +122,6 @@ def _load_audio_real():
             ts_path = str(p)
             break
     if ts_path is None:
-        # Check state_dict case and guide the user
-        if (Path(root_dir) / "model_best_state.pt").exists():
-            raise RuntimeError("Found model_best_state.pt but no TorchScript file. Please export TorchScript (model_best_ts.pt).")
-        # Also check under checkpoint dirs just in case
         for p in Path(root_dir).rglob("model_best_ts.pt"):
             ts_path = str(p); break
     if ts_path is None:
@@ -136,63 +132,80 @@ def _load_audio_real():
         labels = json.load(f)
     num_labels = len(labels)
 
-    # Load TorchScript
-    model = torch.jit.load(ts_path, map_location="cpu")
-    model.eval()
+    # Decide device
+    DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    # target sample rate (optional)
+    # Load TorchScript on the chosen device
+    model = torch.jit.load(ts_path, map_location=DEVICE)
+    model.eval()
+    try:
+        model.to(DEVICE)
+    except Exception:
+        # Some TS graphs ignore .to(), that's okay if map_location already placed it
+        pass
+
+    try:
+        rnn = getattr(model, "rnn", None)
+        if rnn is not None and hasattr(rnn, "flatten_parameters"):
+            rnn.flatten_parameters()
+    except Exception:
+        pass
+
     target_sr = int(os.getenv("AUDIO_TARGET_SR", "16000"))
 
     def infer(path: str):
-        wav, sr = torchaudio.load(path)# [C, T], float32 -1..1
+        # 1) Load/resample/melspec on CPU (typical and simple)
+        wav, sr = torchaudio.load(path)  # [C, T], float32 -1..1
         if wav.ndim == 2 and wav.size(0) > 1:
-            wav = wav.mean(dim=0, keepdim=True)# mono
+            wav = wav.mean(dim=0, keepdim=True)  # mono
         if sr != target_sr:
             wav = torchaudio.transforms.Resample(orig_freq=sr, new_freq=target_sr)(wav)
             sr = target_sr
 
-        wav = wav.squeeze(0)# [T]
+        wav = wav.squeeze(0)  # [T]
 
-        # Feature extraction (adjust if needed to match training)
-        # Reasonable defaults for CRDNN: 80 mel, 25ms window, 10ms hop, log-mel
-        n_mels      = int(os.getenv("AUDIO_N_MELS", "80"))
-        win_ms      = float(os.getenv("AUDIO_WIN_MS", "25"))
-        hop_ms      = float(os.getenv("AUDIO_HOP_MS", "10"))
-        n_fft       = int(os.getenv("AUDIO_N_FFT", "512"))
+        # Feature extraction must match training
+        n_mels = int(os.getenv("AUDIO_N_MELS", "80"))
+        win_ms = float(os.getenv("AUDIO_WIN_MS", "25"))
+        hop_ms = float(os.getenv("AUDIO_HOP_MS", "10"))
+        n_fft  = int(os.getenv("AUDIO_N_FFT", "512"))
 
-        win_length  = int(sr * win_ms / 1000.0)
-        hop_length  = int(sr * hop_ms / 1000.0)
+        win_length = int(sr * win_ms / 1000.0)
+        hop_length = int(sr * hop_ms / 1000.0)
 
         melspec = torchaudio.transforms.MelSpectrogram(
             sample_rate=sr, n_fft=n_fft,
             win_length=win_length, hop_length=hop_length,
             n_mels=n_mels, center=True, power=2.0
         )
-        mel = melspec(wav)# [n_mels, T_frames]
-        mel = torchaudio.transforms.AmplitudeToDB(top_db=80)(mel)# log-mel
-        mel = mel.transpose(0, 1) # [T_frames, n_mels]
-        feats = mel.unsqueeze(0)# [B=1, T, n_mels]
+        mel = melspec(wav)  # [n_mels, T_frames]
+        mel = torchaudio.transforms.AmplitudeToDB(top_db=80)(mel)
+        mel = mel.transpose(0, 1)  # [T_frames, n_mels]
+        feats = mel.unsqueeze(0).contiguous()  # [1, T, n_mels], float32
 
-        # SpeechBrain CRDNN expects relative lengths in [0,1]
-        lens = torch.tensor([1.0], dtype=torch.float32)# full length
+        # SpeechBrain CRDNN often expects relative lens in [0,1]
+        lens = torch.tensor([1.0], dtype=torch.float32)
 
-        with torch.no_grad():
+        # Move inputs to DEVICE right before inference
+        feats = feats.to(DEVICE, non_blocking=True)
+        lens  = lens.to(DEVICE, non_blocking=True)
+
+        with torch.inference_mode():
             out = model(feats, lens)
 
-        # Normalize to logits vector
         if isinstance(out, (list, tuple)):
             out = out[0]
         out = torch.as_tensor(out).float().squeeze()
-        logits = out.cpu().numpy()
+        logits = out.detach().cpu().numpy()
 
         if logits.shape[0] != num_labels:
             raise RuntimeError(f"Logits dim {logits.shape[0]} != labels {num_labels}. Adjust feature params or export wrapper.")
         probs = _softmax(logits)
         return {labels[i]: float(probs[i]) for i in range(num_labels)}
 
-
     meta = _read_meta(root_dir, fallback_name="torchscript-audio")
     return labels, infer, meta
+
 
 def _ensure_text_loaded():
     if MODE == "REAL" and _TEXT["pipe"] is None:
