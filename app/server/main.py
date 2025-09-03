@@ -5,6 +5,7 @@ from pathlib import Path
 from routes.text import router as text_router
 from routes.audio import router as audio_router
 from routes.feedback import router as feedback_router
+from routes.analytics import router as analytics_router
 from routes.health import router as health_router
 from utils.db import Base, engine
 
@@ -30,3 +31,4 @@ app.include_router(health_router, prefix="/api")
 app.include_router(text_router, prefix="/api")
 app.include_router(audio_router, prefix="/api")
 app.include_router(feedback_router, prefix="/api")
+app.include_router(analytics_router, prefix="/api")
