@@ -1,0 +1,8 @@
+// Change to your machine IP when testing on a real device
+export const API_BASE = ;
+
+// UI constants
+export const TEXT_MAX = 512;
+export const AUDIO_MAX_SECONDS = 30;       
+export const TEXT_MODEL_NAME = 'bert-goemotions';
+export const AUDIO_MODEL_NAME = 'speechbrain-ser';
