@@ -1,0 +1,13 @@
+{
+  "strategy": "per-class",
+  "threshold": null,
+  "micro/precision": 0.5298898071625344,
+  "micro/recall": 0.6078369410649391,
+  "micro/f1": 0.5661932445360218,
+  "macro/precision": 0.530610300964357,
+  "macro/recall": 0.5369230797438677,
+  "macro/f1": 0.5206471598030983,
+  "subset_accuracy": 0.4099871015293901,
+  "num_labels": 28,
+  "num_samples": 5427
+}

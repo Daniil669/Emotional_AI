@@ -1,6 +1,6 @@
 {
   "name": "bert-goemotions",
-  "version": "20250827",
+  "version": "20250909",
   "activation": "sigmoid",
   "inference_config": "inference_config.json"
 }
