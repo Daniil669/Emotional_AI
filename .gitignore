@@ -1,6 +1,4 @@
-# ===================
 # Global ignores
-# ===================
 *.DS_Store
 *.log
 *.pyc
@@ -14,9 +12,8 @@ __pycache__/
 .env.*
 !.env.example
 
-# ===================
+
 # Python / AI section
-# ===================
 ai/__pycache__/
 ai/**/*.pyc
 ai/**/.ipynb_checkpoints/
@@ -44,15 +41,12 @@ venv/
 .venv/
 !.env.example
 
-# ===================
 # FastAPI backend
-# ===================
 app/server/__pycache__/
 app/server/**/*.pyc
 
-# ===================
+
 # React Native client
-# ===================
 # Android
 android/
 *.apk
@@ -65,7 +59,7 @@ ios/
 *.xcuserstate
 *.xcuserdata/
 
-# Metro + React Native
+# Metro and React Native
 node_modules/
 *.babelrc
 *.watchmanconfig
@@ -87,9 +81,8 @@ yarn-error.log*
 .expo/
 .expo-shared/
 
-# ===================
+
 # IDE / OS
-# ===================
 .vscode/
 .idea/
 *.iml
@@ -99,3 +92,18 @@ Thumbs.db
 ehthumbs.db
 .code-workspace
 wsl_windows_forwarding.txt
+
+# raw datasets
+ai/data/**/wav/
+ai/data/**/audio/
+*.wav
+*.flac
+*.mp3
+
+# Large artifacts
+**/checkpoints/**
+**/*.pt
+**/*.bin
+**/*.npy
+!ai/models/**/eval_test/** 
+
