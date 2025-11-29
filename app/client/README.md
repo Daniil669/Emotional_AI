@@ -153,6 +153,7 @@ Common scripts via `npm`:
 }
 ```
 
-> `run:android` / `run:ios` require native project prebuild; otherwise use Expo Go with `expo start`.
+> `npx expo start --tunnel`
+
 
 ---

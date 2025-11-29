@@ -6,7 +6,7 @@
      "scheme": "emotionai",
     "orientation": "portrait",
     "newArchEnabled": true,
-    "plugins": ["expo-av"],
+    "plugins": [],
     "ios": { "supportsTablet": true },
     "android": { "adaptiveIcon": { "backgroundColor": "#000000" } }, 
     "web": { "bundler": "metro" }

@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { API_BASE } from '../config';
 import { Platform } from 'react-native';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
+
 
 const api = axios.create({ baseURL: API_BASE, timeout: 20000 });
 
@@ -12,29 +13,76 @@ export async function postText(text, lang = 'en') {
 }
 
 
-// Audio
-export async function postAudio(fileUri) {
-  const info = await FileSystem.getInfoAsync(fileUri, { size: true });
-  if (!info.exists) throw new Error(`Audio file not found at ${fileUri}`);
+//Audio
+// export async function postAudio(fileUri) {
+//   const info = await FileSystem.getInfoAsync(fileUri, { size: true });
+//   if (!info.exists) throw new Error(`Audio file not found at ${fileUri}`);
 
-  const rawName = (fileUri.split('/').pop() || '').split('?')[0];
+//   const rawName = (fileUri.split('/').pop() || '').split('?')[0];
+//   const ext = (rawName.split('.').pop() || '').toLowerCase();
+
+//   let name = rawName || `recording.${ext || 'm4a'}`;
+//   let type = 'application/octet-stream';
+//   if (ext === 'wav') type = 'audio/wav';
+//   else if (ext === 'caf') type = 'audio/x-caf';
+//   else if (ext === '3gp' || ext === '3gpp') type = 'audio/3gpp';
+//   else if (ext === 'aac') type = 'audio/aac';
+//   else if (ext === 'mp4' || ext === 'm4a') type = Platform.OS === 'ios' ? 'audio/m4a' : 'audio/mp4';
+//   else { name = 'recording.m4a'; type = Platform.OS === 'ios' ? 'audio/m4a' : 'audio/mp4'; }
+
+//   const form = new FormData();
+//   form.append('file', { uri: fileUri, name, type });
+
+//   const resp = await fetch(`${API_BASE}/audio`, {
+//     method: 'POST',
+//     headers: { Accept: 'application/json' }, // let fetch set boundary
+//     body: form,
+//   });
+
+//   if (!resp.ok) {
+//     const msg = await resp.text();
+//     throw new Error(`Server ${resp.status}: ${msg}`);
+//   }
+//   try { return await resp.json(); } catch { return {}; }
+// }
+
+export async function postAudio(fileUri) {
+  // Ensure the URI has the correct format for Android
+  let uri = fileUri;
+  if (Platform.OS === 'android' && !uri.startsWith('file://')) {
+    uri = 'file://' + uri;
+  }
+  
+  const rawName = (uri.split('/').pop() || '').split('?')[0];
   const ext = (rawName.split('.').pop() || '').toLowerCase();
 
   let name = rawName || `recording.${ext || 'm4a'}`;
   let type = 'application/octet-stream';
+  
   if (ext === 'wav') type = 'audio/wav';
   else if (ext === 'caf') type = 'audio/x-caf';
   else if (ext === '3gp' || ext === '3gpp') type = 'audio/3gpp';
   else if (ext === 'aac') type = 'audio/aac';
   else if (ext === 'mp4' || ext === 'm4a') type = Platform.OS === 'ios' ? 'audio/m4a' : 'audio/mp4';
-  else { name = 'recording.m4a'; type = Platform.OS === 'ios' ? 'audio/m4a' : 'audio/mp4'; }
+  else { 
+    name = 'recording.m4a'; 
+    type = Platform.OS === 'ios' ? 'audio/m4a' : 'audio/mp4'; 
+  }
 
   const form = new FormData();
-  form.append('file', { uri: fileUri, name, type });
+  form.append('file', { 
+    uri: uri, 
+    name, 
+    type 
+  });
+
+  console.log('Uploading:', { uri, name, type });
 
   const resp = await fetch(`${API_BASE}/audio`, {
     method: 'POST',
-    headers: { Accept: 'application/json' }, // let fetch set boundary
+    headers: { 
+      'Accept': 'application/json',
+    },
     body: form,
   });
 
@@ -42,10 +90,13 @@ export async function postAudio(fileUri) {
     const msg = await resp.text();
     throw new Error(`Server ${resp.status}: ${msg}`);
   }
-  try { return await resp.json(); } catch { return {}; }
+  
+  try { 
+    return await resp.json(); 
+  } catch { 
+    return {}; 
+  }
 }
-
-
 
 
 // Feedback

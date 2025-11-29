@@ -65,7 +65,7 @@ pip install -r requirements.txt
 cp .env.example .env   # on Windows: copy .env.example .env
 
 # 4) Run the API (dev)
-uvicorn main:app --reload --port 8000
+uvicorn main:app --host wsl ip --port 8000
 ```
 
 ---
